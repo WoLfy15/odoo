@@ -9,12 +9,12 @@
             <h1>🏢 Team Management</h1>
             <p class="subtitle">Manage and organize your teams</p>
         </div>
-        <div class="header-actions">
+        <div class="button-group">
             <a href="{{ url_for('add_team') }}" class="btn btn-primary">
                 <span class="btn-icon">➕</span> Add New Team
             </a>
             <a href="{{ url_for('add_member') }}" class="btn btn-secondary">
-                <span class="btn-icon">👤</span> Add Team Member
+                <span class="btn-icon">👤</span> Add Member
             </a>
             <a href="{{ url_for('members') }}" class="btn btn-secondary">
                 <span class="btn-icon">👥</span> Members
@@ -79,8 +79,7 @@
     <div class="empty-state">
         <div class="empty-icon">🏢</div>
         <h2>No Teams Yet</h2>
-        <p>Get started by creating your first team</p>
-        <a href="{{ url_for('add_team') }}" class="btn btn-primary">Create Your First Team</a>
+        
     </div>
     {% endif %}
 </div>
@@ -137,27 +136,22 @@
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
 }
 
-.header-actions {
+.btn-icon {
+    font-size: 1.2em;
+}
+
+.button-group {
     display: flex;
-    gap: 12px;
-    align-items: center;
+    gap: 10px;
 }
 
 .btn-secondary {
-    background: #e8e8f8;
-    color: #667eea;
-    border: 2px solid #667eea;
+    background: #6c757d;
+    color: white;
 }
 
 .btn-secondary:hover {
-    background: #667eea;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-}
-
-.btn-icon {
-    font-size: 1.2em;
+    background: #5a6268;
 }
 
 .teams-grid {

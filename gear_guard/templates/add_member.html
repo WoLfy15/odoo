@@ -5,7 +5,7 @@
 {% block content %}
 <div class="form-page-container">
     <div class="back-nav">
-        <a href="{{ url_for('teams') }}" class="back-link">← Back to Teams</a>
+        <a href="{{ url_for('teams') }}" class="back-link">← Return to Teams</a>
     </div>
     
     <div class="form-card">
@@ -13,20 +13,6 @@
             <h1>👤 Add New Team Member</h1>
             <p>Add a new member to your team</p>
         </div>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">
-                        <div class="alert-content">
-                            <span class="alert-icon">{% if category == 'success' %}✓{% else %}ℹ{% endif %}</span>
-                            <span class="alert-message">{{ message }}</span>
-                        </div>
-                        <button class="alert-close" onclick="this.parentElement.style.display='none'">✕</button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
 
         <form method="POST" action="{{ url_for('add_member') }}" class="modern-form">
             <div class="form-section">
@@ -42,11 +28,14 @@
                             type="text" 
                             id="name" 
                             name="name" 
-                            value="{{ form_data.name if form_data else '' }}"
                             required 
                             class="form-control"
                             placeholder="Enter full name"
+                            value="{{ (form_data.name if form_data else '') }}"
                         >
+                        {% if field_errors and field_errors.get('name') %}
+                        <div class="field-error">{{ field_errors.get('name') }}</div>
+                        {% endif %}
                     </div>
 
                     <div class="form-group">
@@ -57,8 +46,8 @@
                             type="text" 
                             id="employee_id" 
                             name="employee_id" 
-                            value="{{ form_data.employee_id if form_data else suggested_employee_id }}"
                             class="form-control"
+                            value="{{ next_employee_id }}"
                             readonly
                         >
                     </div>
@@ -78,11 +67,14 @@
                             type="email" 
                             id="email" 
                             name="email" 
-                            value="{{ form_data.email if form_data else '' }}"
                             required 
                             class="form-control"
                             placeholder="email@example.com"
+                            value="{{ (form_data.email if form_data else '') }}"
                         >
+                        {% if field_errors and field_errors.get('email') %}
+                        <div class="field-error">{{ field_errors.get('email') }}</div>
+                        {% endif %}
                     </div>
 
                     <div class="form-group">
@@ -93,10 +85,13 @@
                             type="tel" 
                             id="phone" 
                             name="phone" 
-                            value="{{ form_data.phone if form_data else '' }}"
                             class="form-control"
-                            placeholder="10-digit number"
+                            placeholder="+91 1234567890"
+                            value="{{ (form_data.phone if form_data else '') }}"
                         >
+                        {% if field_errors and field_errors.get('phone') %}
+                        <div class="field-error">{{ field_errors.get('phone') }}</div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -113,9 +108,9 @@
                             type="text" 
                             id="position" 
                             name="position" 
-                            value="{{ form_data.position if form_data else '' }}"
                             class="form-control"
                             placeholder="e.g., Safety Officer, Engineer"
+                            value="{{ (form_data.position if form_data else '') }}"
                         >
                     </div>
 
@@ -127,11 +122,12 @@
                         <select id="team_id" name="team_id" required class="form-control">
                             <option value="">Select a team</option>
                             {% for team in teams %}
-                            <option value="{{ team.id }}" {% if form_data and form_data.team_id == team.id|string %}selected{% endif %}>
-                                {{ team.name }} - {{ team.department or 'General' }}
-                            </option>
+                            <option value="{{ team.id }}" {% if form_data and (form_data.team_id|string) == (team.id|string) %}selected{% endif %}>{{ team.name }} - {{ team.department or 'General' }}</option>
                             {% endfor %}
                         </select>
+                        {% if field_errors and field_errors.get('team_id') %}
+                        <div class="field-error">{{ field_errors.get('team_id') }}</div>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -143,14 +139,17 @@
                         type="date" 
                         id="joining_date" 
                         name="joining_date" 
-                        value="{{ form_data.joining_date if form_data else '' }}"
                         class="form-control"
+                        value="{{ (form_data.joining_date if form_data else '') }}"
                     >
+                    {% if field_errors and field_errors.get('joining_date') %}
+                    <div class="field-error">{{ field_errors.get('joining_date') }}</div>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="form-actions">
-                <a href="{{ url_for('teams') }}" class="btn btn-secondary">
+                <a href="{{ url_for('members') }}" class="btn btn-secondary">
                     <span>Cancel</span>
                 </a>
                 <button type="submit" class="btn btn-primary" name="action" value="done">
@@ -338,6 +337,12 @@ select.form-control {
 
 .btn-icon {
     font-size: 1.2em;
+}
+
+.field-error {
+    color: #dc3545;
+    font-size: 0.9em;
+    margin-top: 6px;
 }
 </style>
 {% endblock %}

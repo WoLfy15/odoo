@@ -1,4 +1,59 @@
 {% extends 'base.html' %}
+{% block title %}Technician Workspace (Kanban){% endblock %}
 {% block content %}
-<h1>Kanban View</h1>
+<div class="kanban-page">
+	<div class="kanban-header">
+		<h1>🛠 Technician Workspace</h1>
+		<p>Organize corrective and preventive tasks</p>
+	</div>
+
+	<div id="kanban" class="kanban-board">
+		<div class="kanban-column" data-status="NEW">
+			<div class="kanban-column-header">New</div>
+			<div class="kanban-column-body" data-droppable="true"></div>
+		</div>
+		<div class="kanban-column" data-status="NEW_REQUEST">
+			<div class="kanban-column-header">New Request</div>
+			<div class="kanban-column-body" data-droppable="true"></div>
+		</div>
+		<div class="kanban-column" data-status="IN_PROGRESS">
+			<div class="kanban-column-header">In Progress</div>
+			<div class="kanban-column-body" data-droppable="true"></div>
+		</div>
+		<div class="kanban-column" data-status="UNDER_REVIEW">
+			<div class="kanban-column-header">Under Review</div>
+			<div class="kanban-column-body" data-droppable="true"></div>
+		</div>
+		<div class="kanban-column" data-status="REQUIRED">
+			<div class="kanban-column-header">Required</div>
+			<div class="kanban-column-body" data-droppable="true"></div>
+		</div>
+		<div class="kanban-column" data-status="SCRAP">
+			<div class="kanban-column-header">Scrap</div>
+			<div class="kanban-column-body" data-droppable="true"></div>
+		</div>
+	</div>
+
+	<script>
+		window.KANBAN_DATA = {
+			tasks: {{ tasks|tojson|safe }}
+		};
+	</script>
+	<script src="{{ url_for('static', filename='js/kanban.js') }}"></script>
+</div>
+
+<style>
+.kanban-page { max-width: 1200px; margin: 0 auto; padding: 30px; }
+.kanban-header h1 { margin: 0 0 6px; font-weight: 800; }
+.kanban-board { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+.kanban-column { background: white; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
+.kanban-column-header { background: #f3f4f6; padding: 12px 16px; font-weight: 700; }
+.kanban-column-body { min-height: 260px; padding: 12px; }
+.kanban-card { background: white; border: 1px solid #e5e7eb; border-left-width: 6px; border-radius: 8px; margin-bottom: 10px; padding: 10px 12px; cursor: grab; }
+.kanban-card.dragging { opacity: 0.6; }
+.badge { display: inline-block; font-size: 12px; padding: 3px 8px; border-radius: 999px; font-weight: 700; margin-right: 6px; }
+.badge.orange { background: #F97316; color: white; }
+.badge.purple { background: #A855F7; color: white; }
+.warning { color: #dc2626; font-size: 12px; margin-top: 4px; }
+</style>
 {% endblock %}

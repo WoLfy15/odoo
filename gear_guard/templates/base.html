@@ -24,7 +24,7 @@
         }
         
         .nav-container {
-            max-width: 1400px;
+            max-width: 100%;
             margin: 0 auto;
             display: flex;
             align-items: center;
@@ -43,14 +43,21 @@
             display: flex;
             list-style: none;
             margin-left: auto;
+            flex-wrap: nowrap;
+            gap: 0;
+        }
+
+        .nav-links li {
+            display: flex;
         }
         
         .nav-links a {
             color: white;
             text-decoration: none;
-            padding: 15px 20px;
-            display: block;
+            padding: 15px 15px;
+            display: inline-block;
             transition: background 0.2s;
+            white-space: nowrap;
         }
         
         .nav-links a:hover {
@@ -59,6 +66,43 @@
         
         .nav-links a.active {
             background: #3498db;
+        }
+
+        .user-menu {
+            margin-left: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-info {
+            color: white;
+            font-size: 0.9em;
+        }
+
+        .user-name {
+            font-weight: 600;
+        }
+
+        .user-role {
+            opacity: 0.7;
+            font-size: 0.85em;
+        }
+
+        .btn-logout {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: #c0392b;
         }
         
         main {
@@ -75,7 +119,7 @@
                 <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
                 <li><a href="{{ url_for('teams') }}">Teams</a></li>
                 <li><a href="{{ url_for('equipment') }}">Equipment</a></li>
-                <li><a href="{{ url_for('request_form') }}">Requests</a></li>
+                <li><a href="{{ url_for('requests') }}">Requests</a></li>
                 <li><a href="{{ url_for('kanban') }}">Kanban</a></li>
                 <li><a href="{{ url_for('calendar') }}">Calendar</a></li>
             </ul>

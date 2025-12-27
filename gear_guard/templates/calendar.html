@@ -1,4 +1,1138 @@
 {% extends 'base.html' %}
+
+{% block title %}Planning Calendar - Gear Guard{% endblock %}
+
 {% block content %}
-<h1>Calendar View</h1>
+<div class="calendar-container">
+    <div class="calendar-header">
+        <div class="calendar-title">
+            <h1>📅 Planning Calendar</h1>
+            <p>View and manage scheduled maintenance requests</p>
+        </div>
+    </div>
+
+    <div class="calendar-nav">
+        <button onclick="previousMonth()" class="nav-btn">← Previous</button>
+        <h2 id="monthYear" class="month-year"></h2>
+        <button onclick="nextMonth()" class="nav-btn">Next →</button>
+    </div>
+
+    <div class="calendar-grid">
+        <div class="weekday-header">
+            <div class="weekday">Sun</div>
+            <div class="weekday">Mon</div>
+            <div class="weekday">Tue</div>
+            <div class="weekday">Wed</div>
+            <div class="weekday">Thu</div>
+            <div class="weekday">Fri</div>
+            <div class="weekday">Sat</div>
+        </div>
+        <div id="calendarDays" class="calendar-days"></div>
+    </div>
+</div>
+
+<!-- Create Request Modal -->
+<div id="createRequestModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Create Maintenance Request</h2>
+            <button class="close-btn" onclick="closeCreateModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <form id="createRequestForm">
+                <div class="form-group">
+                    <label for="selectedDate" class="form-label">
+                        <span class="label-text">Scheduled Date</span>
+                        <span class="label-required">*</span>
+                    </label>
+                    <input 
+                        type="date" 
+                        id="selectedDate" 
+                        name="selectedDate" 
+                        required 
+                        class="form-control"
+                        readonly
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="equipment" class="form-label">
+                        <span class="label-text">Equipment</span>
+                        <span class="label-required">*</span>
+                    </label>
+                    <select 
+                        id="equipment" 
+                        name="equipment" 
+                        required 
+                        class="form-control"
+                        onchange="handleEquipmentChange()"
+                    >
+                        <option value="">Select equipment</option>
+                    </select>
+                    <div id="equipmentError" class="error-message" style="display:none;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="subject" class="form-label">
+                        <span class="label-text">Subject</span>
+                        <span class="label-required">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="subject" 
+                        name="subject" 
+                        required 
+                        class="form-control"
+                        placeholder="Enter request subject"
+                    >
+                    <div id="subjectError" class="error-message" style="display:none;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description" class="form-label">
+                        <span class="label-text">Description</span>
+                    </label>
+                    <textarea 
+                        id="description" 
+                        name="description" 
+                        rows="3" 
+                        class="form-control"
+                        placeholder="Describe the maintenance needed"
+                    ></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="requestType" class="form-label">
+                        <span class="label-text">Request Type</span>
+                        <span class="label-required">*</span>
+                    </label>
+                    <div class="type-toggle">
+                        <label class="toggle-label">
+                            <input 
+                                type="radio" 
+                                name="requestType" 
+                                value="PREVENTIVE" 
+                                checked 
+                                class="toggle-input"
+                            >
+                            <span class="toggle-text preventive">🛡️ Preventive</span>
+                        </label>
+                        <label class="toggle-label">
+                            <input 
+                                type="radio" 
+                                name="requestType" 
+                                value="CORRECTIVE" 
+                                class="toggle-input"
+                            >
+                            <span class="toggle-text corrective">⚠️ Corrective</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="technician" class="form-label">
+                        <span class="label-text">Assign Technician</span>
+                        <span class="label-required">*</span>
+                        <span class="auto-assigned" id="autoAssignedLabel" style="display:none;">✨ Auto-assigned</span>
+                    </label>
+                    <select 
+                        id="technician" 
+                        name="technician" 
+                        required 
+                        class="form-control"
+                    >
+                        <option value="">Select a technician</option>
+                    </select>
+                    <div id="technicianError" class="error-message" style="display:none;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="priority" class="form-label">
+                        <span class="label-text">Priority</span>
+                    </label>
+                    <select 
+                        id="priority" 
+                        name="priority" 
+                        class="form-control"
+                    >
+                        <option value="MEDIUM" selected>Medium</option>
+                        <option value="LOW">Low</option>
+                        <option value="HIGH">High</option>
+                        <option value="URGENT">🔥 Urgent</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="dueDate" class="form-label">
+                        <span class="label-text">Due Date</span>
+                    </label>
+                    <input 
+                        type="date" 
+                        id="dueDate" 
+                        name="dueDate" 
+                        class="form-control"
+                    >
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeCreateModal()">Cancel</button>
+                    <button type="submit" class="btn-create">Create Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast"></div>
+
+<style>
+    .calendar-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .calendar-title h1 {
+        margin: 0 0 5px 0;
+        font-size: 32px;
+        color: #1a1a1a;
+    }
+
+    .calendar-title p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .btn-add-request {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-add-request:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .calendar-nav {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 30px;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .nav-btn {
+        padding: 8px 16px;
+        background: #f0f0f0;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+
+    .month-year {
+        min-width: 200px;
+        text-align: center;
+        font-size: 20px;
+        color: #333;
+        margin: 0;
+    }
+
+    .calendar-grid {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .weekday-header {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 8px;
+        margin-bottom: 8px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .weekday {
+        text-align: center;
+        font-weight: 600;
+        color: #666;
+        padding: 8px;
+        font-size: 13px;
+    }
+
+    .calendar-days {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 8px;
+    }
+
+    .day-cell {
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 8px;
+        height: 100px;
+        max-height: 100px;
+        cursor: default;
+        transition: all 0.2s;
+        display: flex;
+        flex-direction: column;
+        background: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .day-cell:hover {
+        border-color: #667eea;
+        background: #f8f9ff;
+    }
+
+    .day-cell.other-month {
+        background: #f8f9fa;
+        color: #ccc;
+        cursor: default;
+    }
+
+    .day-cell.other-month:hover {
+        border-color: #e0e0e0;
+        background: #f8f9fa;
+    }
+
+    .day-cell.today {
+        background: #fff3cd;
+        border-color: #ffc107;
+    }
+
+    .day-number {
+        font-weight: 600;
+        color: #333;
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+
+    .day-tasks {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .task-pill {
+        font-size: 9px;
+        padding: 2px 4px;
+        border-radius: 3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
+        transition: all 0.2s;
+        line-height: 1.3;
+    }
+
+    .task-pill.corrective {
+        background: #ff9500;
+        color: white;
+    }
+
+    .task-pill.preventive {
+        background: #9c27b0;
+        color: white;
+    }
+
+    .task-pill:hover {
+        transform: scale(1.05);
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.2s;
+    }
+
+    .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal-content {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+        width: 90%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: slideUp 0.3s;
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 20px;
+        color: #1a1a1a;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 28px;
+        cursor: pointer;
+        color: #666;
+        transition: all 0.2s;
+    }
+
+    .close-btn:hover {
+        color: #1a1a1a;
+    }
+
+    .modal-body {
+        padding: 24px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .label-required {
+        color: #e74c3c;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: inherit;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .type-toggle {
+        display: flex;
+        gap: 10px;
+    }
+
+    .toggle-label {
+        flex: 1;
+        position: relative;
+    }
+
+    .toggle-input {
+        display: none;
+    }
+
+    .toggle-text {
+        display: block;
+        padding: 10px 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        text-align: center;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .toggle-text.preventive {
+        color: #9c27b0;
+    }
+
+    .toggle-text.corrective {
+        color: #ff9500;
+    }
+
+    .toggle-input:checked + .toggle-text {
+        background: var(--color);
+        color: white;
+        border-color: var(--color);
+    }
+
+    .toggle-label:has(.toggle-input:checked) .toggle-text.preventive {
+        --color: #9c27b0;
+    }
+
+    .toggle-label:has(.toggle-input:checked) .toggle-text.corrective {
+        --color: #ff9500;
+    }
+
+    .error-message {
+        color: #e74c3c;
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+        padding-top: 20px;
+    }
+
+    .btn-cancel,
+    .btn-create {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel {
+        background: #f0f0f0;
+        color: #333;
+    }
+
+    .btn-cancel:hover {
+        background: #e0e0e0;
+    }
+
+    .btn-create {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Toast Notification */
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 16px 24px;
+        background: #4caf50;
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        opacity: 0;
+        transform: translateY(100px);
+        transition: all 0.3s;
+        pointer-events: none;
+        z-index: 2000;
+    }
+
+    .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+
+    .toast.success {
+        background: #4caf50;
+    }
+
+    .toast.error {
+        background: #e74c3c;
+    }
+
+    @media (max-width: 768px) {
+        .calendar-days {
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .day-cell {
+            height: 80px;
+            max-height: 80px;
+            padding: 4px;
+        }
+
+        .day-number {
+            font-size: 11px;
+            margin-bottom: 4px;
+        }
+
+        .task-pill {
+            font-size: 8px;
+            padding: 1px 3px;
+        }
+    }
+</style>
+
+<!-- Scripts: date-fns and Calendar Logic -->
+<script src="https://cdn.jsdelivr.net/npm/date-fns@3.0.0/index.min.js"></script>
+<script>
+    // ============================================
+    // STATE MANAGEMENT
+    // ============================================
+    let currentDate = new Date();
+    let globalTasks = [];
+    let selectedDate = null;
+    let technicians = [];
+    let equipmentList = [];
+    let selectedEquipment = null;
+
+    console.log('Calendar script loaded!');
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    function initCalendar() {
+        console.log('Initializing calendar...');
+        loadEquipment();
+        loadTechnicians();
+        loadTasks();
+        renderCalendar();
+        setupFormHandlers();
+        console.log('Calendar initialized!');
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCalendar);
+    } else {
+        initCalendar();
+    }
+
+    // ============================================
+    // API: LOAD EQUIPMENT
+    // ============================================
+    function loadEquipment() {
+        console.log('Loading equipment from /api/equipment...');
+        fetch('/api/equipment')
+            .then(res => {
+                console.log('Equipment response status:', res.status);
+                return res.json();
+            })
+            .then(data => {
+                console.log('Equipment data:', data);
+                equipmentList = data.equipment || [];
+                populateEquipmentDropdown();
+            })
+            .catch(err => {
+                console.error('Error loading equipment:', err);
+                equipmentList = [];
+            });
+    }
+
+    // ============================================
+    // POPULATE EQUIPMENT DROPDOWN
+    // ============================================
+    function populateEquipmentDropdown() {
+        const select = document.getElementById('equipment');
+        select.innerHTML = '<option value="">Select equipment</option>';
+        
+        equipmentList.forEach(eq => {
+            const option = document.createElement('option');
+            option.value = eq.id;
+            option.textContent = `${eq.name} - ${eq.category || 'N/A'} (${eq.location || 'N/A'})`;
+            option.dataset.maintenanceTeamId = eq.maintenance_team_id || '';
+            option.dataset.technicianId = eq.technician_id || '';
+            select.appendChild(option);
+        });
+    }
+
+    // ============================================
+    // HANDLE EQUIPMENT CHANGE - AUTO ASSIGNMENT
+    // ============================================
+    function handleEquipmentChange() {
+        const equipmentSelect = document.getElementById('equipment');
+        const selectedOption = equipmentSelect.options[equipmentSelect.selectedIndex];
+        const technicianSelect = document.getElementById('technician');
+        const autoLabel = document.getElementById('autoAssignedLabel');
+        
+        if (selectedOption.value) {
+            const equipmentId = selectedOption.value;
+            selectedEquipment = equipmentList.find(eq => eq.id == equipmentId);
+            
+            // Auto-assign technician if equipment has one
+            if (selectedOption.dataset.technicianId) {
+                technicianSelect.value = selectedOption.dataset.technicianId;
+                autoLabel.style.display = 'inline';
+                console.log('Auto-assigned technician:', selectedOption.dataset.technicianId);
+            } else {
+                autoLabel.style.display = 'none';
+            }
+            
+            // Auto-fill subject if empty
+            const subjectInput = document.getElementById('subject');
+            if (!subjectInput.value && selectedEquipment) {
+                const requestType = document.querySelector('input[name="requestType"]:checked').value;
+                subjectInput.value = `${requestType} Maintenance - ${selectedEquipment.name}`;
+            }
+        } else {
+            autoLabel.style.display = 'none';
+            selectedEquipment = null;
+        }
+    }
+
+    // ============================================
+    // API: LOAD TECHNICIANS
+    // ============================================
+    function loadTechnicians() {
+        console.log('Loading technicians from /api/technicians...');
+        fetch('/api/technicians')
+            .then(res => {
+                console.log('Technicians response status:', res.status);
+                return res.json();
+            })
+            .then(data => {
+                console.log('Technicians data:', data);
+                technicians = data.technicians || [];
+                populateTechnicianDropdown();
+            })
+            .catch(err => {
+                console.error('Error loading technicians:', err);
+                technicians = [];
+            });
+    }
+
+    // ============================================
+    // POPULATE TECHNICIAN DROPDOWN
+    // ============================================
+    function populateTechnicianDropdown() {
+        const select = document.getElementById('technician');
+        select.innerHTML = '<option value="">Select a technician</option>';
+        
+        technicians.forEach(tech => {
+            const option = document.createElement('option');
+            option.value = tech.id;
+            option.textContent = tech.name;
+            select.appendChild(option);
+        });
+    }
+
+    // ============================================
+    // API: LOAD TASKS
+    // ============================================
+    function loadTasks() {
+        console.log('Loading tasks from /api/requests...');
+        fetch('/api/requests')
+            .then(res => {
+                console.log('Tasks response status:', res.status);
+                return res.json();
+            })
+            .then(data => {
+                console.log('Tasks data:', data);
+                globalTasks = data.requests || [];
+                renderCalendar();
+            })
+            .catch(err => {
+                console.error('Error loading tasks:', err);
+                globalTasks = [];
+                renderCalendar();
+            });
+    }
+
+    // ============================================
+    // LOGIC 1: CALENDAR RENDERING
+    // Uses date-fns equivalent logic
+    // ============================================
+    function renderCalendar() {
+        console.log('Rendering calendar for:', currentDate);
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        
+        // Update month/year display
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        document.getElementById('monthYear').textContent = `${monthNames[month]} ${year}`;
+        
+        // Get calendar grid data (similar to eachDayOfInterval)
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const daysInPrevMonth = new Date(year, month, 0).getDate();
+        
+        const calendarDays = document.getElementById('calendarDays');
+        calendarDays.innerHTML = '';
+        
+        console.log(`Calendar: ${firstDay} first day, ${daysInMonth} days, tasks: ${globalTasks.length}`);
+        
+        // Add days from previous month
+        for (let i = firstDay - 1; i >= 0; i--) {
+            const day = daysInPrevMonth - i;
+            const cellDate = new Date(year, month - 1, day);
+            const cell = createDayCell(day, true, cellDate);
+            calendarDays.appendChild(cell);
+        }
+        
+        // Add days of current month
+        const today = new Date();
+        for (let day = 1; day <= daysInMonth; day++) {
+            const cellDate = new Date(year, month, day);
+            const isToday = isSameDay(cellDate, today);
+            const cell = createDayCell(day, false, cellDate, isToday);
+            calendarDays.appendChild(cell);
+        }
+        
+        // Add days from next month
+        const remainingCells = 42 - (firstDay + daysInMonth);
+        for (let day = 1; day <= remainingCells; day++) {
+            const cellDate = new Date(year, month + 1, day);
+            const cell = createDayCell(day, true, cellDate);
+            calendarDays.appendChild(cell);
+        }
+        
+        console.log('Calendar rendered successfully!');
+    }
+
+    // ============================================
+    // LOGIC 1 DETAIL: CREATE DAY CELL WITH TASKS
+    // Mapping Logic: Filter tasks by date
+    // Sort Order: CORRECTIVE before PREVENTIVE
+    // ============================================
+    function createDayCell(day, isOtherMonth, cellDate, isToday = false) {
+        const cell = document.createElement('div');
+        cell.className = 'day-cell';
+        
+        if (isOtherMonth) {
+            cell.classList.add('other-month');
+        }
+        
+        if (isToday) {
+            cell.classList.add('today');
+        }
+        
+        // ============================================
+        // INTERACTIVE VIEW - DAY CELL
+        // Click to create request on this date
+        // ============================================
+        if (!isOtherMonth) {
+            cell.style.cursor = 'pointer';
+            cell.addEventListener('click', () => {
+                const dateString = cellDate.toISOString().split('T')[0];
+                document.getElementById('selectedDate').value = dateString;
+                document.getElementById('createRequestModal').classList.add('show');
+            });
+        }
+        
+        // Day number
+        const dayNumber = document.createElement('div');
+        dayNumber.className = 'day-number';
+        dayNumber.textContent = day;
+        cell.appendChild(dayNumber);
+        
+        // Tasks container
+        const tasksContainer = document.createElement('div');
+        tasksContainer.className = 'day-tasks';
+        
+        // ============================================
+        // MAPPING LOGIC: Filter tasks for this day
+        // Find tasks where isSameDay(task.scheduledDate, cellDate)
+        // ============================================
+        if (!isOtherMonth) {
+            const dayTasks = globalTasks.filter(task => {
+                const taskDate = task.scheduledDate 
+                    ? new Date(task.scheduledDate) 
+                    : (task.dueDate ? new Date(task.dueDate) : null);
+                return taskDate ? isSameDay(taskDate, cellDate) : false;
+            });
+            
+            // ============================================
+            // SORT ORDER: CORRECTIVE first, then PREVENTIVE
+            // ============================================
+            dayTasks.sort((a, b) => {
+                const aOrder = a.type === 'CORRECTIVE' ? 0 : 1;
+                const bOrder = b.type === 'CORRECTIVE' ? 0 : 1;
+                return aOrder - bOrder;
+            });
+            
+            // Render task pills (max 3, show overflow)
+            dayTasks.slice(0, 3).forEach(task => {
+                const pill = document.createElement('div');
+                pill.className = `task-pill ${task.type.toLowerCase()}`;
+                pill.textContent = task.title;
+                pill.title = `${task.title} (${task.status})`;
+                tasksContainer.appendChild(pill);
+            });
+            
+            // Show overflow indicator
+            if (dayTasks.length > 3) {
+                const overflow = document.createElement('div');
+                overflow.className = 'task-pill';
+                overflow.style.background = '#999';
+                overflow.textContent = `+${dayTasks.length - 3} more`;
+                tasksContainer.appendChild(overflow);
+            }
+        }
+        
+        cell.appendChild(tasksContainer);
+        return cell;
+    }
+
+    // ============================================
+    // DATE UTILITY: Check if two dates are same day
+    // ============================================
+    function isSameDay(date1, date2) {
+        return date1.getFullYear() === date2.getFullYear() &&
+               date1.getMonth() === date2.getMonth() &&
+               date1.getDate() === date2.getDate();
+    }
+
+    // ============================================
+    // FORMAT DATE: YYYY-MM-DD
+    // ============================================
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    // ============================================
+    // NAVIGATION: Month Controls
+    // ============================================
+    function previousMonth() {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderCalendar();
+    }
+
+    function nextMonth() {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderCalendar();
+    }
+
+    // ============================================
+    // LOGIC 2 DETAIL: OPEN MODAL WITH DATE
+    // Capture date object and auto-fill scheduledDate
+    // ============================================
+    function openCreateModalForDate(date) {
+        selectedDate = date;
+        document.getElementById('selectedDate').value = formatDate(date);
+        openCreateModal();
+    }
+
+    function openCreateModal() {
+        if (selectedDate) {
+            document.getElementById('selectedDate').value = formatDate(selectedDate);
+        }
+        document.getElementById('createRequestModal').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeCreateModal() {
+        document.getElementById('createRequestModal').classList.remove('show');
+        document.getElementById('createRequestForm').reset();
+        clearErrors();
+        document.body.style.overflow = 'auto';
+    }
+
+    // ============================================
+    // CLEAR ERROR MESSAGES
+    // ============================================
+    function clearErrors() {
+        document.getElementById('subjectError').style.display = 'none';
+        document.getElementById('technicianError').style.display = 'none';
+        document.getElementById('equipmentError').style.display = 'none';
+    }
+
+    // ============================================
+    // SETUP FORM HANDLERS
+    // ============================================
+    function setupFormHandlers() {
+        document.getElementById('createRequestForm').addEventListener('submit', handleFormSubmit);
+    }
+
+    // ============================================
+    // LOGIC 3: FORM SUBMISSION
+    // Validation: Subject + Technician + Equipment required
+    // Create task object with forced status NEW_REQUEST
+    // Dispatch API call and instant UI update
+    // ============================================
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        
+        clearErrors();
+        
+        // Get form values
+        const equipmentId = document.getElementById('equipment').value;
+        const subject = document.getElementById('subject').value.trim();
+        const technicianId = document.getElementById('technician').value;
+        const description = document.getElementById('description').value.trim();
+        const requestType = document.querySelector('input[name="requestType"]:checked').value;
+        const priority = document.getElementById('priority').value;
+        const dueDate = document.getElementById('dueDate').value;
+        
+        // ============================================
+        // VALIDATION: Equipment, Subject and Technician
+        // ============================================
+        let isValid = true;
+        
+        if (!equipmentId) {
+            document.getElementById('equipmentError').textContent = 'Please select equipment';
+            document.getElementById('equipmentError').style.display = 'block';
+            isValid = false;
+        }
+        
+        if (!subject) {
+            document.getElementById('subjectError').textContent = 'Subject is required';
+            document.getElementById('subjectError').style.display = 'block';
+            isValid = false;
+        }
+        
+        if (!technicianId) {
+            document.getElementById('technicianError').textContent = 'Please select a technician';
+            document.getElementById('technicianError').style.display = 'block';
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            return;
+        }
+        
+        // ============================================
+        // OBJECT CREATION: Construct Task Object
+        // Status: Force to 'NEW_REQUEST'
+        // Type: From toggle selection
+        // ============================================
+        const requestData = {
+            title: subject,
+            description: description,
+            equipment_id: parseInt(equipmentId),
+            technician_id: parseInt(technicianId),
+            type: requestType,  // CORRECTIVE or PREVENTIVE
+            priority: priority,
+            status: 'NEW_REQUEST',  // Force default status
+            scheduled_date: document.getElementById('selectedDate').value,
+            due_date: dueDate || null
+        };
+        
+        console.log('Submitting request:', requestData);
+        
+        // ============================================
+        // DISPATCH: Call API
+        // ============================================
+        fetch('/api/requests', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // Add to global tasks immediately (instant UI update)
+                globalTasks.push(data.request);
+                
+                // ============================================
+                // UX: Close Modal -> Toast -> Re-render
+                // No page refresh needed
+                // ============================================
+                closeCreateModal();
+                showToast('✅ Maintenance Request Created Successfully!', 'success');
+                
+                // Re-render calendar instantly without reload
+                renderCalendar();
+            } else {
+                showToast('❌ Error: ' + (data.message || 'Failed to create request'), 'error');
+            }
+        })
+        .catch(err => {
+            console.error('Error creating request:', err);
+            showToast('❌ Error creating request', 'error');
+        });
+    }
+
+    // ============================================
+    // TOAST NOTIFICATION
+    // ============================================
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast show ${type}`;
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    // ============================================
+    // CLOSE MODAL ON OUTSIDE CLICK
+    // ============================================
+    window.addEventListener('click', (e) => {
+        const modal = document.getElementById('createRequestModal');
+        if (e.target === modal) {
+            closeCreateModal();
+        }
+    });
+</script>
 {% endblock %}

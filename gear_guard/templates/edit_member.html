@@ -5,7 +5,7 @@
 {% block content %}
 <div class="form-page-container">
     <div class="back-nav">
-        <a href="{{ url_for('teams') }}" class="back-link">← Back to Teams</a>
+        <a href="{{ url_for('members') }}" class="back-link">← Back to Team Members</a>
     </div>
     
     <div class="form-card">
@@ -13,20 +13,6 @@
             <h1>✏️ Edit Team Member</h1>
             <p>Update member information</p>
         </div>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">
-                        <div class="alert-content">
-                            <span class="alert-icon">{% if category == 'success' %}✓{% else %}ℹ{% endif %}</span>
-                            <span class="alert-message">{{ message }}</span>
-                        </div>
-                        <button class="alert-close" onclick="this.parentElement.style.display='none'">✕</button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
 
         <form method="POST" action="{{ url_for('edit_member', member_id=member.id) }}" class="modern-form">
             <div class="form-section">
@@ -46,6 +32,9 @@
                             required 
                             class="form-control"
                         >
+                        {% if field_errors and field_errors.get('name') %}
+                        <div class="field-error">{{ field_errors.get('name') }}</div>
+                        {% endif %}
                     </div>
 
                     <div class="form-group">
@@ -59,6 +48,9 @@
                             value="{{ member.employee_id or '' }}" 
                             class="form-control"
                         >
+                        {% if field_errors and field_errors.get('employee_id') %}
+                        <div class="field-error">{{ field_errors.get('employee_id') }}</div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -80,6 +72,9 @@
                             required 
                             class="form-control"
                         >
+                        {% if field_errors and field_errors.get('email') %}
+                        <div class="field-error">{{ field_errors.get('email') }}</div>
+                        {% endif %}
                     </div>
 
                     <div class="form-group">
@@ -93,6 +88,9 @@
                             value="{{ member.phone or '' }}" 
                             class="form-control"
                         >
+                        {% if field_errors and field_errors.get('phone') %}
+                        <div class="field-error">{{ field_errors.get('phone') }}</div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -127,6 +125,9 @@
                             </option>
                             {% endfor %}
                         </select>
+                        {% if field_errors and field_errors.get('team_id') %}
+                        <div class="field-error">{{ field_errors.get('team_id') }}</div>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -158,7 +159,7 @@
             </div>
 
             <div class="form-actions">
-                <a href="{{ url_for('teams') }}" class="btn btn-secondary">
+                <a href="{{ url_for('member_detail', member_id=member.id) }}" class="btn btn-secondary">
                     <span>Cancel</span>
                 </a>
                 <button type="submit" class="btn btn-primary">
@@ -338,6 +339,12 @@ select.form-control {
 
 .btn-icon {
     font-size: 1.2em;
+}
+
+.field-error {
+    color: #dc3545;
+    font-size: 0.9em;
+    margin-top: 6px;
 }
 </style>
 {% endblock %}

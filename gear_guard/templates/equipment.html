@@ -1,4 +1,383 @@
 {% extends 'base.html' %}
+
+{% block title %}Equipment Management{% endblock %}
+
 {% block content %}
-<h1>Equipment</h1>
+<div class="page-container">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        .page-container {
+            padding: 0;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .equipment-header-section {
+            background: white;
+            padding: 40px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .equipment-header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .equipment-title-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .equipment-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+        }
+
+        .equipment-title-text h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .equipment-title-text p {
+            margin: 5px 0 0 0;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            text-decoration: none;
+            color: white;
+        }
+
+        .equipment-main {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 40px;
+        }
+
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+        }
+
+        .equipment-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #e0e0e0;
+        }
+
+        .equipment-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            transform: translateY(-4px);
+        }
+
+        .equipment-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .equipment-card-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #667eea;
+        }
+
+        .equipment-card-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
+        }
+
+        .equipment-card-category {
+            color: #667eea;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .equipment-card-description {
+            color: #999;
+            font-size: 14px;
+            margin: 12px 0;
+            min-height: 40px;
+        }
+
+        .equipment-card-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 16px 0;
+            padding: 12px 0;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .equipment-card-footer {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-view {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #138496;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-edit {
+            background: #ffc107;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #e0a800;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+            text-decoration: none;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+
+        .empty-state-text {
+            color: #999;
+            margin-bottom: 30px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-dismissible {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: inherit;
+        }
+    </style>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible" role="alert">
+                    <span>{{ message }}</span>
+                    <button type="button" class="btn-close" onclick="this.parentElement.style.display='none';">&times;</button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="equipment-header-section">
+        <div class="equipment-header-content">
+            <div class="equipment-title-section">
+                <div class="equipment-icon">⚙️</div>
+                <div class="equipment-title-text">
+                    <h1>Equipment Management</h1>
+                    <p>Manage and organize your equipment</p>
+                </div>
+            </div>
+            <div class="header-buttons">
+                <a href="{{ url_for('add_equipment') }}" class="btn-primary">+ Add New Equipment</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="equipment-main">
+        {% if equipment %}
+            <div class="equipment-grid">
+                {% for item in equipment %}
+                <div class="equipment-card">
+                    <div class="equipment-card-header">
+                        <div>
+                            <h3 class="equipment-card-name">{{ item.name }}</h3>
+                            <p class="equipment-card-category">{{ item.category or 'General' }}</p>
+                            {% if item.company %}
+                            <div style="margin-top:6px;font-size:12px;font-weight:600;color:#764ba2;">🏢 {{ item.company }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="equipment-card-icon">📦</div>
+                    </div>
+                    <p class="equipment-card-description">{{ item.description or '' }}</p>
+                    <div class="equipment-card-stats">
+                        <div class="stat-item">
+                            <div class="stat-icon">👤</div>
+                            {% set emp = members_by_id.get(item.employee_id) if members_by_id else None %}
+                            <div class="stat-value">{{ emp.name[:1].upper() if emp else '-' }}</div>
+                            <div class="stat-label">Employee</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">🛠</div>
+                            {% set team = teams_by_id.get(item.maintenance_team_id) if teams_by_id else None %}
+                            <div class="stat-value">{{ team.name if team else '-' }}</div>
+                            <div class="stat-label">Team</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">📅</div>
+                            <div class="stat-value">{{ item.assigned_date.strftime('%Y-%m-%d') if item.assigned_date else '-' }}</div>
+                            <div class="stat-label">Assigned</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:12px; justify-content: space-between; font-size:12px; color:#666; margin-top:8px;">
+                        <div>🏭 Work Center: <strong style="color:#333;">{{ item.work_center or '-' }}</strong></div>
+                        <div>🗑 Scrap: <strong style="color:#333;">{{ item.scrap_date.strftime('%Y-%m-%d') if item.scrap_date else '-' }}</strong></div>
+                    </div>
+                    <div class="equipment-card-footer">
+                        <a href="{{ url_for('view_equipment', id=item.id) }}" class="btn-action btn-view">View Details</a>
+                        <a href="{{ url_for('edit_equipment', id=item.id) }}" class="btn-action btn-edit">Edit</a>
+                        <form method="POST" action="{{ url_for('delete_equipment', id=item.id) }}" style="flex: 1;">
+                            <button type="submit" class="btn-action btn-delete" onclick="return confirm('Are you sure?');">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📦</div>
+                <h2 class="empty-state-title">No Equipment Yet</h2>
+                <p class="empty-state-text">Start by adding your first piece of equipment</p>
+                <a href="{{ url_for('add_equipment') }}" class="btn-primary">+ Add Equipment</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

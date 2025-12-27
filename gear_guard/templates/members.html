@@ -9,8 +9,8 @@
             <h1>👥 Team Members</h1>
             <p class="subtitle">Manage your team members and their assignments</p>
         </div>
-        <a href="{{ url_for('teams') }}" class="btn btn-secondary">
-            <span class="btn-icon">←</span> Back to Teams
+        <a href="{{ url_for('teams') }}" class="btn btn-primary">
+            <span class="btn-icon">↩</span> Return to Teams
         </a>
     </div>
 
@@ -90,8 +90,7 @@
     <div class="empty-state">
         <div class="empty-icon">👥</div>
         <h2>No Team Members Yet</h2>
-        <p>Start building your team by adding members</p>
-        <a href="{{ url_for('add_member') }}" class="btn btn-primary">Add First Member</a>
+        <a href="{{ url_for('teams') }}" class="btn btn-primary">Return to Teams</a>
     </div>
     {% endif %}
 </div>
@@ -150,18 +149,6 @@
 
 .btn-icon {
     font-size: 1.2em;
-}
-
-.btn-secondary {
-    background: #e8e8f8;
-    color: #667eea;
-    border: 2px solid #667eea;
-}
-
-.btn-secondary:hover {
-    background: #667eea;
-    color: white;
-    transform: translateY(-2px);
 }
 
 .table-container {
