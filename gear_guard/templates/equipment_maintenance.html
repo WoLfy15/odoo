@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Equipment Maintenance{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <style>
+        .container { max-width: 1100px; margin: 24px auto; padding: 0 24px; }
+        .header { display:flex; justify-content: space-between; align-items:center; background:#fff; border:1px solid #e0e0e0; border-radius:12px; padding:24px; }
+        .title { font-size:22px; font-weight:700; }
+        .list { margin-top:16px; background:#fff; border:1px solid #e0e0e0; border-radius:12px; padding:18px; }
+        .empty { text-align:center; color:#666; padding:24px; }
+        .btn { display:inline-block; padding:10px 16px; border-radius:8px; text-decoration:none; font-weight:600; font-size:13px; }
+        .btn-outline { background:#fff; border:1px solid #e0e0e0; color:#333; }
+        .item { padding:12px 0; border-bottom:1px solid #eee; }
+        .item:last-child { border-bottom:none; }
+    </style>
+    <div class="container">
+        <div class="header">
+            <div class="title">Maintenance for {{ equipment.name }}</div>
+            <div>
+                <a class="btn btn-outline" href="{{ url_for('view_equipment', id=equipment.id) }}">← Back to Details</a>
+            </div>
+        </div>
+        <div class="list">
+            {% if requests and requests|length > 0 %}
+                {% for r in requests %}
+                    <div class="item">
+                        <div style="font-weight:700;">{{ r.title }}</div>
+                        <div style="color:#666; font-size:13px;">Status: {{ r.status }} | Due: {{ r.due_date.strftime('%Y-%m-%d') if r.due_date else '—' }}</div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty">No maintenance requests yet.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
