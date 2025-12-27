@@ -18,6 +18,14 @@ if not app.config.get('SECRET_KEY'):
 db.init_app(app)
 migrate = Migrate(app, db)
 
+# Add response headers to prevent caching
+@app.after_request
+def add_header(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    return response
+
 # Login required decorator
 def login_required(f):
     @wraps(f)
@@ -166,6 +174,9 @@ def generate_employee_id():
 
 @app.route('/')
 def dashboard():
+    # Refresh database session to ensure fresh data
+    db.session.expire_all()
+    
     # Get statistics for dashboard
     total_teams = Team.query.count()
     total_members = TeamMember.query.count()
@@ -287,6 +298,55 @@ def calendar():
 def requests():
     all_requests = Request.query.order_by(Request.created_at.desc()).all()
     return render_template('requests.html', requests=all_requests)
+
+@app.route('/requests/new', methods=['GET', 'POST'])
+def new_request():
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        description = request.form.get('description', '').strip()
+        equipment_id = request.form.get('equipment_id')
+        technician_id = request.form.get('technician_id')
+        request_type = request.form.get('type', 'PREVENTIVE')
+        priority = request.form.get('priority', 'MEDIUM')
+        scheduled_date_str = request.form.get('scheduled_date')
+        due_date_str = request.form.get('due_date')
+        
+        if not title or not technician_id:
+            flash('Title and technician are required', 'danger')
+        else:
+            from datetime import datetime as dt
+            scheduled_date = dt.strptime(scheduled_date_str, '%Y-%m-%d').date() if scheduled_date_str else None
+            due_date = dt.strptime(due_date_str, '%Y-%m-%d').date() if due_date_str else None
+            
+            team_id = None
+            if equipment_id:
+                eq = Equipment.query.get(equipment_id)
+                if eq and eq.maintenance_team_id:
+                    team_id = eq.maintenance_team_id
+            
+            new_req = Request(
+                title=title,
+                description=description,
+                technician_id=int(technician_id),
+                equipment_id=int(equipment_id) if equipment_id else None,
+                team_id=team_id,
+                type=request_type,
+                priority=priority,
+                status='NEW_REQUEST',
+                scheduled_date=scheduled_date,
+                due_date=due_date,
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow()
+            )
+            
+            db.session.add(new_req)
+            db.session.commit()
+            flash('Request created successfully!', 'success')
+            return redirect(url_for('requests'))
+    
+    equipment_list = Equipment.query.all()
+    technicians = TeamMember.query.filter_by(status='active').all()
+    return render_template('request_form.html', equipment=equipment_list, technicians=technicians)
 
 # Team Management Routes
 @app.route('/teams')

@@ -4,8 +4,15 @@
 
 {% block content %}
 <div class="dashboard-container">
-    <h1>📊 Dashboard</h1>
-    <p class="welcome-text">Welcome to Gear Guard - Team & Equipment Management System</p>
+    <div class="dashboard-header">
+        <div>
+            <h1>📊 Dashboard</h1>
+            <p class="welcome-text">Welcome to Gear Guard - Team & Equipment Management System</p>
+        </div>
+        <button onclick="window.print()" class="btn-print no-print">
+            🖨️ Print Dashboard
+        </button>
+    </div>
     
     <!-- Key Metrics -->
     <div class="stats-grid">
@@ -676,5 +683,288 @@
         flex-direction: column;
     }
 }
+
+/* Dashboard Header with Print Button */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.btn-print {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.btn-print:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Print Styles */
+@media print {
+    /* Hide non-printable elements */
+    .no-print,
+    nav,
+    .stat-link,
+    .view-all-link,
+    .action-btn,
+    .view-btn {
+        display: none !important;
+    }
+    
+    /* Reset page margins and colors */
+    @page {
+        margin: 1cm;
+        size: A4;
+    }
+    
+    body {
+        background: white !important;
+        color: black !important;
+        font-size: 12pt;
+    }
+    
+    .dashboard-container {
+        max-width: 100%;
+        padding: 0;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 24pt;
+        margin-bottom: 10px;
+        color: black !important;
+    }
+    
+    .welcome-text {
+        font-size: 11pt;
+        color: #333 !important;
+        margin-bottom: 20px;
+    }
+    
+    /* Stats grid for print */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        page-break-inside: avoid;
+        margin-bottom: 20px;
+    }
+    
+    .stat-card {
+        background: white !important;
+        border: 2px solid #ddd !important;
+        box-shadow: none !important;
+        padding: 15px;
+        page-break-inside: avoid;
+    }
+    
+    .stat-card.blue { border-color: #3498db !important; }
+    .stat-card.green { border-color: #2ecc71 !important; }
+    .stat-card.orange { border-color: #e67e22 !important; }
+    .stat-card.purple { border-color: #9b59b6 !important; }
+    .stat-card.red { border-color: #e74c3c !important; }
+    
+    .stat-info h3 {
+        font-size: 20pt;
+        color: black !important;
+    }
+    
+    .stat-info p {
+        color: #333 !important;
+        font-size: 10pt;
+    }
+    
+    .stat-info small {
+        color: #666 !important;
+        font-size: 9pt;
+    }
+    
+    /* Secondary stats */
+    .secondary-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 20px;
+        page-break-inside: avoid;
+    }
+    
+    .stat-item {
+        border: 1px solid #ddd !important;
+        background: white !important;
+        padding: 10px;
+    }
+    
+    .stat-label {
+        color: #333 !important;
+        font-size: 9pt;
+    }
+    
+    .stat-value {
+        color: black !important;
+        font-size: 14pt;
+    }
+    
+    /* Content grid */
+    .content-grid {
+        display: block;
+    }
+    
+    .card {
+        background: white !important;
+        border: 2px solid #ddd !important;
+        box-shadow: none !important;
+        margin-bottom: 20px;
+        page-break-inside: avoid;
+        padding: 15px;
+    }
+    
+    .card h2 {
+        color: black !important;
+        font-size: 14pt;
+        border-bottom: 2px solid #ddd;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+    
+    /* Requests list */
+    .request-item {
+        border: 1px solid #ddd !important;
+        background: white !important;
+        padding: 10px;
+        margin-bottom: 10px;
+        page-break-inside: avoid;
+    }
+    
+    .request-header {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+        margin-bottom: 5px;
+    }
+    
+    .request-type,
+    .request-status {
+        border: 1px solid #333 !important;
+        color: black !important;
+        background: white !important;
+        padding: 3px 8px;
+        font-size: 8pt;
+    }
+    
+    .request-item h4 {
+        color: black !important;
+        font-size: 11pt;
+    }
+    
+    .request-meta {
+        color: #666 !important;
+        font-size: 9pt;
+    }
+    
+    /* Teams list */
+    .team-item {
+        border-bottom: 1px solid #ddd;
+        padding: 10px 0;
+        page-break-inside: avoid;
+    }
+    
+    .team-item h4 {
+        color: black !important;
+        font-size: 11pt;
+    }
+    
+    .team-company {
+        color: #666 !important;
+        font-size: 9pt;
+    }
+    
+    /* Technicians */
+    .technicians-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .technician-badge {
+        border: 1px solid #ddd !important;
+        background: white !important;
+        padding: 8px;
+        page-break-inside: avoid;
+    }
+    
+    .tech-avatar {
+        background: #f0f0f0 !important;
+        color: black !important;
+        border: 1px solid #ddd;
+    }
+    
+    .tech-name {
+        color: black !important;
+        font-size: 10pt;
+    }
+    
+    .tech-position {
+        color: #666 !important;
+        font-size: 8pt;
+    }
+    
+    /* Actions grid - hide in print */
+    .actions-grid {
+        display: none !important;
+    }
+    
+    /* Empty states */
+    .empty-state {
+        color: #999 !important;
+        font-style: italic;
+        font-size: 10pt;
+    }
+    
+    /* Add page breaks between major sections */
+    .content-grid > .card:nth-child(2) {
+        page-break-before: auto;
+    }
+    
+    /* Print footer with date */
+    .dashboard-container::after {
+        content: "Printed on: " attr(data-print-date);
+        display: block;
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 15px;
+        border-top: 1px solid #ddd;
+        font-size: 9pt;
+        color: #999;
+    }
+}
 </style>
+
+<script>
+// Add print date
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.querySelector('.dashboard-container');
+    if (container) {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        container.setAttribute('data-print-date', dateStr);
+    }
+});
+</script>
 {% endblock %}

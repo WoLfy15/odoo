@@ -505,9 +505,9 @@
 <div class="requests-container">
     <div class="page-header">
         <h1>📋 Maintenance Requests</h1>
-        <button class="btn-create" onclick="openCreateModal()">
+        <a href="{{ url_for('new_request') }}" class="btn-create" style="text-decoration: none; display: inline-block;">
             ➕ Create Request
-        </button>
+        </a>
     </div>
 
     <!-- Statistics Row -->
@@ -841,7 +841,14 @@ function updateSubjectFromType() {
 
 // Open create modal
 function openCreateModal() {
-    document.getElementById('createModal').classList.add('active');
+    console.log('Opening modal...');
+    const modal = document.getElementById('createModal');
+    if (modal) {
+        modal.classList.add('active');
+        console.log('Modal classes:', modal.className);
+    } else {
+        console.error('Modal element not found!');
+    }
     clearErrors();
 }
 

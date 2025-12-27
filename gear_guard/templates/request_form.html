@@ -1,4 +1,205 @@
 {% extends 'base.html' %}
+
+{% block title %}Create Maintenance Request{% endblock %}
+
 {% block content %}
-<h1>Request Form</h1>
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 30px auto;
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .form-header {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    .form-header h1 {
+        color: #2c3e50;
+        font-size: 1.8em;
+        margin-bottom: 10px;
+    }
+    .form-header p {
+        color: #666;
+        font-size: 0.95em;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #2c3e50;
+        font-weight: 600;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 0.95em;
+    }
+    .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    .radio-group {
+        display: flex;
+        gap: 20px;
+        margin-top: 10px;
+    }
+    .radio-group label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: normal;
+    }
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #f0f0f0;
+    }
+    .btn {
+        flex: 1;
+        padding: 14px 24px;
+        border: none;
+        border-radius: 6px;
+        font-size: 1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        text-align: center;
+        display: inline-block;
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    .btn-secondary {
+        background: white;
+        color: #666;
+        border: 2px solid #ddd;
+    }
+    .btn-secondary:hover {
+        border-color: #999;
+        color: #333;
+    }
+</style>
+
+<div class="form-container">
+    <div class="form-header">
+        <h1>📝 Create Maintenance Request</h1>
+        <p>Fill in the details below to create a new maintenance request</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}" style="padding: 12px; margin-bottom: 20px; border-radius: 6px; background: {% if category == 'success' %}#d4edda{% else %}#f8d7da{% endif %}; color: {% if category == 'success' %}#155724{% else %}#721c24{% endif %};">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('new_request') }}">
+        <div class="form-group">
+            <label for="equipment_id">Equipment *</label>
+            <select id="equipment_id" name="equipment_id" required>
+                <option value="">Select equipment...</option>
+                {% for eq in equipment %}
+                <option value="{{ eq.id }}">{{ eq.name }} - {{ eq.category }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="title">Subject *</label>
+            <input type="text" id="title" name="title" placeholder="Enter request subject" required>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" placeholder="Detailed description of the maintenance request"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Request Type *</label>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="type" value="PREVENTIVE" checked>
+                    Preventive
+                </label>
+                <label>
+                    <input type="radio" name="type" value="CORRECTIVE">
+                    Corrective
+                </label>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="priority">Priority *</label>
+                <select id="priority" name="priority" required>
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM" selected>Medium</option>
+                    <option value="HIGH">High</option>
+                    <option value="URGENT">Urgent</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="technician_id">Assigned Technician *</label>
+                <select id="technician_id" name="technician_id" required>
+                    <option value="">Select technician...</option>
+                    {% for tech in technicians %}
+                    <option value="{{ tech.id }}">{{ tech.name }} - {{ tech.position }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="scheduled_date">Scheduled Date *</label>
+                <input type="date" id="scheduled_date" name="scheduled_date" required>
+            </div>
+
+            <div class="form-group">
+                <label for="due_date">Due Date</label>
+                <input type="date" id="due_date" name="due_date">
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('requests') }}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Create Request</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Set default scheduled date to today
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('scheduled_date').value = today;
+    });
+</script>
 {% endblock %}
