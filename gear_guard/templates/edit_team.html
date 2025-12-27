@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Team - Gear Guard{% endblock %}
+
+{% block content %}
+<div class="form-page-container">
+    <div class="back-nav">
+        <a href="{{ url_for('teams') }}" class="back-link">← Back to Teams</a>
+    </div>
+    
+    <div class="form-card">
+        <div class="form-header">
+            <h1>✏️ Edit Team</h1>
+            <p>Update team information</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('edit_team', team_id=team.id) }}" class="modern-form">
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="name" class="form-label">
+                        <span class="label-text">Team Name</span>
+                        <span class="label-required">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        value="{{ team.name }}" 
+                        required 
+                        class="form-control"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="department" class="form-label">
+                        <span class="label-text">Department</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="department" 
+                        name="department" 
+                        value="{{ team.department or '' }}" 
+                        class="form-control"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="description" class="form-label">
+                        <span class="label-text">Description</span>
+                    </label>
+                    <textarea 
+                        id="description" 
+                        name="description" 
+                        rows="5" 
+                        class="form-control"
+                    >{{ team.description or '' }}</textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('team_detail', team_id=team.id) }}" class="btn btn-secondary">
+                    <span>Cancel</span>
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-icon">✓</span>
+                    <span>Update Team</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.form-page-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.back-nav {
+    margin-bottom: 20px;
+}
+
+.back-link {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 1em;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.back-link:hover {
+    color: #5568d3;
+    transform: translateX(-4px);
+}
+
+.form-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.form-header {
+    padding: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.form-header h1 {
+    margin: 0 0 12px 0;
+    font-size: 2.5em;
+    font-weight: 700;
+}
+
+.form-header p {
+    margin: 0;
+    font-size: 1.1em;
+    opacity: 0.9;
+}
+
+.modern-form {
+    padding: 40px;
+}
+
+.form-section {
+    margin-bottom: 32px;
+}
+
+.form-group {
+    margin-bottom: 28px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 1em;
+}
+
+.label-text {
+    margin-right: 4px;
+}
+
+.label-required {
+    color: #dc3545;
+    font-weight: 700;
+}
+
+.form-control {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1em;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 16px;
+    padding-top: 24px;
+    border-top: 2px solid #e9ecef;
+}
+
+.btn {
+    padding: 14px 32px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 1.05em;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+.btn-icon {
+    font-size: 1.2em;
+}
+</style>
+{% endblock %}

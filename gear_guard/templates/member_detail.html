@@ -1,0 +1,444 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ member.name }} - Gear Guard{% endblock %}
+
+{% block content %}
+<div class="detail-page-container">
+    <div class="detail-header-card">
+        <div class="back-button">
+            <a href="{{ url_for('members') }}" class="btn-back">← Back to Members</a>
+        </div>
+        
+        <div class="member-header-section">
+            <div class="member-avatar-xl">{{ member.name[0].upper() }}</div>
+            <div class="member-header-info">
+                <h1>{{ member.name }}</h1>
+                <p class="position-title">{{ member.position or 'No Position Assigned' }}</p>
+                <span class="status-badge status-{{ member.status }}">{{ member.status|title }}</span>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('edit_member', member_id=member.id) }}" class="btn btn-edit">
+                    <span class="btn-icon">✏️</span> Edit
+                </a>
+                <form method="POST" action="{{ url_for('delete_member', member_id=member.id) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-delete" onclick="return confirm('Delete this member?')">
+                        <span class="btn-icon">🗑️</span> Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-content-grid">
+        <div class="left-section">
+            <div class="info-card">
+                <h3 class="card-title">📞 Contact Information</h3>
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">{{ member.email }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Phone</span>
+                        <span class="info-value">{{ member.phone or 'Not provided' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Employee ID</span>
+                        <span class="info-value">{{ member.employee_id or 'Not assigned' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3 class="card-title">🏢 Team & Work Information</h3>
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Team</span>
+                        <span class="info-value">
+                            {% if member.team %}
+                            <a href="{{ url_for('team_detail', team_id=member.team.id) }}" class="team-link">
+                                {{ member.team.name }}
+                            </a>
+                            {% else %}
+                            Unassigned
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Department</span>
+                        <span class="info-value">{{ member.team.department if member.team else 'N/A' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Position</span>
+                        <span class="info-value">{{ member.position or 'Not assigned' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Joining Date</span>
+                        <span class="info-value">{{ member.joining_date.strftime('%B %d, %Y') if member.joining_date else 'Not recorded' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-section">
+            <div class="info-card">
+                <h3 class="card-title">⚙️ Assigned Equipment</h3>
+                {% if member.equipment_assigned %}
+                <div class="equipment-list">
+                    {% for equipment in member.equipment_assigned %}
+                    <div class="equipment-item">
+                        <div class="equipment-icon">⚙️</div>
+                        <div class="equipment-info">
+                            <h4>{{ equipment.name }}</h4>
+                            <span class="equipment-status status-{{ equipment.status }}">{{ equipment.status|title }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-equipment">
+                    <div class="empty-icon">⚙️</div>
+                    <p>No equipment currently assigned</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="info-card">
+                <h3 class="card-title">📅 Timeline</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h4>Member Added</h4>
+                            <p>{{ member.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                        </div>
+                    </div>
+                    {% if member.updated_at and member.updated_at != member.created_at %}
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h4>Last Updated</h4>
+                            <p>{{ member.updated_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.detail-page-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+.detail-header-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 40px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+    color: white;
+}
+
+.back-button {
+    margin-bottom: 20px;
+}
+
+.btn-back {
+    color: white;
+    text-decoration: none;
+    font-size: 1em;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+}
+
+.btn-back:hover {
+    opacity: 1;
+}
+
+.member-header-section {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.member-avatar-xl {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3em;
+    font-weight: 700;
+    backdrop-filter: blur(10px);
+    flex-shrink: 0;
+}
+
+.member-header-info {
+    flex: 1;
+}
+
+.member-header-info h1 {
+    margin: 0 0 8px 0;
+    font-size: 2.5em;
+    font-weight: 700;
+}
+
+.position-title {
+    margin: 0 0 12px 0;
+    font-size: 1.2em;
+    opacity: 0.9;
+}
+
+.status-badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.status-active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-inactive {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-on-leave {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-edit {
+    background: white;
+    color: #667eea;
+}
+
+.btn-edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+}
+
+.btn-delete {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+}
+
+.detail-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.info-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+}
+
+.card-title {
+    margin: 0 0 24px 0;
+    color: #1a1a1a;
+    font-size: 1.3em;
+    font-weight: 600;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 12px;
+}
+
+.info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 20px;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #6c757d;
+    min-width: 120px;
+}
+
+.info-value {
+    color: #1a1a1a;
+    font-weight: 500;
+    text-align: right;
+    flex: 1;
+}
+
+.team-link {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.team-link:hover {
+    text-decoration: underline;
+}
+
+.equipment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.equipment-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    transition: all 0.2s;
+}
+
+.equipment-item:hover {
+    background: #e9ecef;
+    transform: translateX(8px);
+}
+
+.equipment-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    flex-shrink: 0;
+}
+
+.equipment-info {
+    flex: 1;
+}
+
+.equipment-info h4 {
+    margin: 0 0 6px 0;
+    color: #1a1a1a;
+    font-size: 1em;
+}
+
+.equipment-status {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.status-available {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.empty-equipment {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.empty-icon {
+    font-size: 3em;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.empty-equipment p {
+    color: #6c757d;
+    margin: 0;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 40px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 24px;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -34px;
+    width: 12px;
+    height: 12px;
+    background: #667eea;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 2px #667eea;
+}
+
+.timeline-content h4 {
+    margin: 0 0 6px 0;
+    color: #1a1a1a;
+    font-size: 1em;
+    font-weight: 600;
+}
+
+.timeline-content p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+@media (max-width: 1024px) {
+    .detail-content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

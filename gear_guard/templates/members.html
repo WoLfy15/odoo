@@ -1,0 +1,418 @@
+{% extends 'base.html' %}
+
+{% block title %}Team Members - Gear Guard{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h1>👥 Team Members</h1>
+            <p class="subtitle">Manage your team members and their assignments</p>
+        </div>
+        <a href="{{ url_for('teams') }}" class="btn btn-secondary">
+            <span class="btn-icon">←</span> Back to Teams
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    <div class="alert-content">
+                        <span class="alert-icon">{% if category == 'success' %}✓{% else %}ℹ{% endif %}</span>
+                        <span class="alert-message">{{ message }}</span>
+                    </div>
+                    <button class="alert-close" onclick="this.parentElement.style.display='none'">✕</button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if members %}
+    <div class="table-container">
+        <table class="modern-table">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Contact</th>
+                    <th>Position</th>
+                    <th>Team</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in members %}
+                <tr>
+                    <td>
+                        <div class="member-cell">
+                            <div class="member-avatar">{{ member.name[0].upper() }}</div>
+                            <div class="member-info">
+                                <div class="member-name">{{ member.name }}</div>
+                                <div class="member-id">{{ member.employee_id or 'No ID' }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="contact-info">
+                            <div class="email">📧 {{ member.email }}</div>
+                            <div class="phone">📱 {{ member.phone or 'N/A' }}</div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="position-badge">{{ member.position or 'Not Assigned' }}</span>
+                    </td>
+                    <td>
+                        <span class="team-badge">
+                            {{ member.team.name if member.team else 'Unassigned' }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge status-{{ member.status }}">
+                            {{ member.status|title }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{{ url_for('member_detail', member_id=member.id) }}" class="btn-icon-action" title="View Details">👁️</a>
+                            <a href="{{ url_for('edit_member', member_id=member.id) }}" class="btn-icon-action" title="Edit">✏️</a>
+                            <form method="POST" action="{{ url_for('delete_member', member_id=member.id) }}" style="display:inline;">
+                                <button type="submit" class="btn-icon-action btn-danger" onclick="return confirm('Delete this member?')" title="Delete">🗑️</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <h2>No Team Members Yet</h2>
+        <p>Start building your team by adding members</p>
+        <a href="{{ url_for('add_member') }}" class="btn btn-primary">Add First Member</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.page-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.page-header h1 {
+    color: #1a1a1a;
+    font-size: 2.5em;
+    margin: 0 0 8px 0;
+    font-weight: 700;
+}
+
+.subtitle {
+    color: #6c757d;
+    font-size: 1.1em;
+    margin: 0;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.btn-icon {
+    font-size: 1.2em;
+}
+
+.btn-secondary {
+    background: #e8e8f8;
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.btn-secondary:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.table-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.modern-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.modern-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.modern-table th {
+    padding: 18px 20px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.95em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.modern-table td {
+    padding: 20px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.modern-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.modern-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.member-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.member-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3em;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.member-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.member-name {
+    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 1em;
+}
+
+.member-id {
+    font-size: 0.85em;
+    color: #6c757d;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.email, .phone {
+    font-size: 0.9em;
+    color: #495057;
+}
+
+.position-badge {
+    background: #e7f3ff;
+    color: #0066cc;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.team-badge {
+    background: #f0e7ff;
+    color: #6610f2;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.status-active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-inactive {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-on-leave {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon-action {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    background: #e9ecef;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-icon-action:hover {
+    background: #667eea;
+    transform: scale(1.1);
+}
+
+.btn-icon-action.btn-danger:hover {
+    background: #dc3545;
+}
+
+.alert {
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-weight: 500;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.alert-message {
+    flex: 1;
+}
+
+.alert-close {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1.3em;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.alert-close:hover {
+    opacity: 1;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-icon {
+    font-size: 1.5em;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.empty-icon {
+    font-size: 5em;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-state h2 {
+    color: #1a1a1a;
+    margin-bottom: 12px;
+    font-size: 2em;
+}
+
+.empty-state p {
+    color: #6c757d;
+    font-size: 1.2em;
+    margin-bottom: 32px;
+}
+</style>
+{% endblock %}

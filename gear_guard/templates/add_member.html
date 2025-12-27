@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Team Member - Gear Guard{% endblock %}
+
+{% block content %}
+<div class="form-page-container">
+    <div class="back-nav">
+        <a href="{{ url_for('teams') }}" class="back-link">← Back to Teams</a>
+    </div>
+    
+    <div class="form-card">
+        <div class="form-header">
+            <h1>👤 Add New Team Member</h1>
+            <p>Add a new member to your team</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <div class="alert-content">
+                            <span class="alert-icon">{% if category == 'success' %}✓{% else %}ℹ{% endif %}</span>
+                            <span class="alert-message">{{ message }}</span>
+                        </div>
+                        <button class="alert-close" onclick="this.parentElement.style.display='none'">✕</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('add_member') }}" class="modern-form">
+            <div class="form-section">
+                <h3 class="section-title">Personal Information</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name" class="form-label">
+                            <span class="label-text">Full Name</span>
+                            <span class="label-required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            value="{{ form_data.name if form_data else '' }}"
+                            required 
+                            class="form-control"
+                            placeholder="Enter full name"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="employee_id" class="form-label">
+                            <span class="label-text">Employee ID</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="employee_id" 
+                            name="employee_id" 
+                            value="{{ form_data.employee_id if form_data else suggested_employee_id }}"
+                            class="form-control"
+                            readonly
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">Contact Details</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            <span class="label-text">Email Address</span>
+                            <span class="label-required">*</span>
+                        </label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            value="{{ form_data.email if form_data else '' }}"
+                            required 
+                            class="form-control"
+                            placeholder="email@example.com"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone" class="form-label">
+                            <span class="label-text">Phone Number</span>
+                        </label>
+                        <input 
+                            type="tel" 
+                            id="phone" 
+                            name="phone" 
+                            value="{{ form_data.phone if form_data else '' }}"
+                            class="form-control"
+                            placeholder="10-digit number"
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">Work Information</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="position" class="form-label">
+                            <span class="label-text">Position/Role</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="position" 
+                            name="position" 
+                            value="{{ form_data.position if form_data else '' }}"
+                            class="form-control"
+                            placeholder="e.g., Safety Officer, Engineer"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="team_id" class="form-label">
+                            <span class="label-text">Assign to Team</span>
+                            <span class="label-required">*</span>
+                        </label>
+                        <select id="team_id" name="team_id" required class="form-control">
+                            <option value="">Select a team</option>
+                            {% for team in teams %}
+                            <option value="{{ team.id }}" {% if form_data and form_data.team_id == team.id|string %}selected{% endif %}>
+                                {{ team.name }} - {{ team.department or 'General' }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="joining_date" class="form-label">
+                        <span class="label-text">Joining Date</span>
+                    </label>
+                    <input 
+                        type="date" 
+                        id="joining_date" 
+                        name="joining_date" 
+                        value="{{ form_data.joining_date if form_data else '' }}"
+                        class="form-control"
+                    >
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('teams') }}" class="btn btn-secondary">
+                    <span>Cancel</span>
+                </a>
+                <button type="submit" class="btn btn-primary" name="action" value="done">
+                    <span class="btn-icon">✓</span>
+                    <span>Done</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.form-page-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.back-nav {
+    margin-bottom: 20px;
+}
+
+.back-link {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 1em;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.back-link:hover {
+    color: #5568d3;
+    transform: translateX(-4px);
+}
+
+.form-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.form-header {
+    padding: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.form-header h1 {
+    margin: 0 0 12px 0;
+    font-size: 2.5em;
+    font-weight: 700;
+}
+
+.form-header p {
+    margin: 0;
+    font-size: 1.1em;
+    opacity: 0.9;
+}
+
+.modern-form {
+    padding: 40px;
+}
+
+.form-section {
+    margin-bottom: 40px;
+}
+
+.section-title {
+    color: #667eea;
+    font-size: 1.3em;
+    margin: 0 0 24px 0;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e9ecef;
+    font-weight: 600;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 1em;
+}
+
+.label-text {
+    margin-right: 4px;
+}
+
+.label-required {
+    color: #dc3545;
+    font-weight: 700;
+}
+
+.form-control {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1em;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.form-control::placeholder {
+    color: #adb5bd;
+}
+
+select.form-control {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 18px center;
+    padding-right: 45px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 16px;
+    padding-top: 24px;
+    border-top: 2px solid #e9ecef;
+}
+
+.btn {
+    padding: 14px 32px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 1.05em;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    min-flex: 0;
+}
+
+.form-actions .btn {
+    flex: 1;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+.btn-icon {
+    font-size: 1.2em;
+}
+</style>
+{% endblock %}
